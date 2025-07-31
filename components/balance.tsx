@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 import Image from "next/image";
@@ -8,7 +8,8 @@ import { APP_CONSTANTS, availableCoins } from "@/lib/constant";
 import { ChevronDown } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export const Balance = () => {
+// Inner component that uses useSearchParams
+function BalanceContent() {
   const query = useSearchParams();
   const r = useRouter();
   const [open, setOpen] = useState(false);
@@ -71,5 +72,14 @@ export const Balance = () => {
         </ul>
       </PopoverContent>
     </Popover>
+  );
+}
+
+// Wrapper component with Suspense boundary
+export const Balance = () => {
+  return (
+    <Suspense fallback={<div className="h-10 w-24 bg-secondary animate-pulse rounded-md"></div>}>
+      <BalanceContent />
+    </Suspense>
   );
 };
