@@ -30,11 +30,10 @@ export const BuyNdSellCard = () => {
           Sell
         </Button>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 p-2 md:p-6">
         <ConversionCard
           type="sell"
           amount={sell.amount}
-          showAmountInDollar
           onAmountChange={(amt) => {
             edit?.("sell", "amount", amt);
           }}
