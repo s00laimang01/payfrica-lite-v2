@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FC } from "react";
 import { Separator } from "./ui/separator";
 import Image from "next/image";
 import {
@@ -20,6 +20,9 @@ import {
   Settings2,
   Upload,
 } from "lucide-react";
+import { toast } from "sonner";
+import { useWallet } from "@suiet/wallet-kit";
+import { useRouter } from "next/navigation";
 
 const navs = [
   {
@@ -44,7 +47,16 @@ const navs = [
   },
 ];
 
-export const NavBarMobile = () => {
+export const NavBarMobile: FC<{}> = ({}) => {
+  const r = useRouter();
+  const { address } = useWallet();
+
+  const copyAddress = (addr?: string) => {
+    if (!addr) return;
+    navigator.clipboard.writeText(addr);
+    toast.success("Address copied to clipboard");
+  };
+
   return (
     <div className="bg-white shadow-2xl px-4 py-2 rounded-full flex items-center md:hidden">
       <div className="space-x-1">
@@ -64,7 +76,7 @@ export const NavBarMobile = () => {
         <DropdownMenuTrigger asChild>
           <Image
             alt="avatar"
-            src={`https://avatar.vercel.sh/s`}
+            src={`https://avatar.vercel.sh/${address}`}
             width={40}
             height={40}
             className="rounded-full ml-3"
@@ -73,7 +85,11 @@ export const NavBarMobile = () => {
         <DropdownMenuContent className="w-56" align="start">
           <DropdownMenuLabel className="flex items-center justify-between">
             Wallet Details
-            <Copy size={17} className="font-bold hover:text-primary" />
+            <Copy
+              onClick={() => copyAddress(address)}
+              size={17}
+              className="font-bold hover:text-primary"
+            />
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
@@ -85,7 +101,10 @@ export const NavBarMobile = () => {
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive hover:text-destructive">
+          <DropdownMenuItem
+            onClick={() => r.push("/account")}
+            className="text-destructive hover:text-destructive"
+          >
             <Upload size={19} className="text-destructive rotate-90" />
             Disconnect
             <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>

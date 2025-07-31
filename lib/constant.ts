@@ -1,3 +1,5 @@
+import { paymentGateway } from "@/types";
+
 export enum APP_CONSTANTS {
   appName = "PAYFRICA",
   VERCEL_AVATAR = "https://avatar.vercel.sh",
@@ -42,5 +44,15 @@ export const availableCoins = [
     id: "naira",
     name: "Naira",
     image: `${APP_CONSTANTS.VERCEL_AVATAR}/naira`,
+  },
+];
+
+export const availablePaymentProviders: paymentGateway[] = [
+  {
+    id: "paystack",
+    description:
+      "Paystack is a digital payment gateway that allows users to send and receive money in real-time.",
+    image: "/paystack.svg",
+    label: "Paystack",
   },
 ];

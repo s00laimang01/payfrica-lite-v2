@@ -1,38 +1,10 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import "@suiet/wallet-kit/style.css";
 import "./globals.css";
 import { NeedHelp } from "@/components/need-help";
 import { Toaster } from "@/components/ui/sonner";
-
-//const redRose = localFont({
-//  src: [
-//    {
-//      path: "/fonts/RedRose-Bold.ttf",
-//      style: "bold",
-//      weight: "800",
-//    },
-//    {
-//      path: "/fonts/RedRose-Regular.ttf",
-//      style: "normal",
-//      weight: "400",
-//    },
-//    {
-//      path: "/fonts/RedRose-Light.ttf",
-//      style: "light",
-//      weight: "300",
-//    },
-//    {
-//      path: "/fonts/RedRose-SemiBold.ttf",
-//      style: "semi-bold",
-//      weight: "700",
-//    },
-//    {
-//      path: "/fonts/RedRose-Medium.ttf",
-//      style: "medium",
-//      weight: "500",
-//    },
-//  ],
-//});
+import { WalletProvider } from "@suiet/wallet-kit";
+import { ClientProvider } from "@/components/client-provider";
 
 export const metadata: Metadata = {
   title: "PAYFRICA LITE",
@@ -41,15 +13,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode;
+  modal: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`antialiased overflow-y-auto min-h-screen relative`}>
-        <Toaster position="bottom-right" />
-        {children}
-        <NeedHelp className="fixed bottom-5 mb-3 right-4 mr-5 z-50 hidden md:flex" />
+        <ClientProvider>
+          {children}
+          {modal}
+          <Toaster position="bottom-right" />
+          <NeedHelp className="fixed bottom-5 mb-3 right-4 mr-5 z-50 hidden md:flex" />
+        </ClientProvider>
       </body>
     </html>
   );

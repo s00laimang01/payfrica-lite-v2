@@ -15,9 +15,11 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+import { cn, payfricalitev2 } from "@/lib/utils";
 import { APP_CONSTANTS } from "@/lib/constant";
 import { toast } from "sonner";
+import { useWallet } from "@suiet/wallet-kit";
+import { useRouter } from "next/navigation";
 
 export const AccountInfo: FC<IAccountInfo> = ({
   username = "s00laimang",
@@ -27,6 +29,8 @@ export const AccountInfo: FC<IAccountInfo> = ({
   },
   ...props
 }) => {
+  const r = useRouter();
+  const { address, ...wallet } = useWallet();
   const copyAddress = (addr?: string) => {
     if (!addr) return;
     navigator.clipboard.writeText(addr);
@@ -45,11 +49,11 @@ export const AccountInfo: FC<IAccountInfo> = ({
         >
           <Image
             alt="avatar"
-            src={`${APP_CONSTANTS.VERCEL_AVATAR}/${username}`}
+            src={`${APP_CONSTANTS.VERCEL_AVATAR}/${address}`}
             {...image}
             className="rounded-full"
           />
-          <p>0xA0...b910</p>
+          <p>{payfricalitev2.truncateAddress(address!)}</p>
           <ChevronDown size={19} />
         </Button>
       </DropdownMenuTrigger>
@@ -58,7 +62,7 @@ export const AccountInfo: FC<IAccountInfo> = ({
           Wallet Details
           <Copy
             size={17}
-            onClick={() => copyAddress("0xA0...b910")}
+            onClick={() => copyAddress(address)}
             className="font-bold hover:text-primary"
           />
         </DropdownMenuLabel>
@@ -67,7 +71,7 @@ export const AccountInfo: FC<IAccountInfo> = ({
           <DropdownMenuItem className="flex items-center justify-between">
             Network
             <DropdownMenuLabel className="font-bold text-primary">
-              SUI Network
+              {wallet.chain?.name}
             </DropdownMenuLabel>
           </DropdownMenuItem>
           <DropdownMenuItem className="flex items-center justify-between">
@@ -82,7 +86,10 @@ export const AccountInfo: FC<IAccountInfo> = ({
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive hover:text-destructive">
+        <DropdownMenuItem
+          onClick={() => r.push("/account")}
+          className="text-destructive hover:text-destructive"
+        >
           <Upload size={19} className="text-destructive rotate-90" />
           Disconnect
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>

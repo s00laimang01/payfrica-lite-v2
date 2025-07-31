@@ -13,22 +13,36 @@ export const ConversionCard: FC<IConversionCard> = ({
   amount = 0,
   ...props
 }) => {
-  const [selectedCoin, setSelectedCoin] = useState<ICoin>();
   const conversion = useConversation();
 
+  //This is trigger when a user selects a coin
   const onCoinSelect = (c: ICoin) => {
     const _type: Record<IConversionCard["type"], IConversionCard["type"]> = {
       buy: "sell",
       sell: "buy",
     };
 
-    const coins = conversion?.[_type[type]]?.coins.filter(
-      (coin) => coin.id !== c.id
-    );
+    const allCoins = Array.from(
+      new Set(
+        [...conversion?.[type]?.coins, ...conversion?.[_type[type]]?.coins].map(
+          (coin) => JSON.stringify(coin)
+        )
+      )
+    ).map((strCoin) => JSON.parse(strCoin));
 
-    setSelectedCoin(c);
-    conversion.edit?.(_type[type], "coins", coins);
-    conversion.edit?.(_type[type], "selectedCoin", c);
+    conversion.edit?.(type, "coins", allCoins);
+
+    const oppositeCoins = allCoins.filter((coin) => coin.id !== c.id);
+    conversion.edit?.(_type[type], "coins", oppositeCoins);
+
+    // Update the selected coin
+    //setSelectedCoin(c);
+    conversion.edit?.(type, "selectedCoin", c);
+
+    // If the same coin was selected on both sides, update the current side
+    if (c?.id === conversion?.[type]?.selectedCoin?.id) {
+      conversion.edit?.(type, "selectedCoin", oppositeCoins[0]);
+    }
   };
 
   return (
@@ -47,15 +61,16 @@ export const ConversionCard: FC<IConversionCard> = ({
 
                   props?.onAmountChange?.(Number(e.target.value));
                 }}
-                className="text-primary selection:bg-none selection:text-primary-foreground dark:bg-none border-none flex h-9 w-24 min-w-0 rounded-md border bg-transparent px-0 py-0 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed md:text-2xl  focus-visible:border-none focus-visible:ring-0
+                className="text-primary selection:bg-none selection:text-primary-foreground dark:bg-none border-none flex h-9 w-24 min-w-0 rounded-md border bg-transparent px-0 py-0 text-base shadow-none transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed md:text-2xl  focus-visible:border-none focus-visible:ring-0
         aria-invalid:ring-0 dark:aria-invalid:ring-0 aria-invalid:border-none"
               />
               {props.showAmountInDollar && <span>~$32,342.43</span>}
             </CardTitle>
           </div>
           <CoinSelector
+            key={conversion?.[type]?.selectedCoin?.id}
             onCoinSelect={onCoinSelect}
-            selectedCoin={selectedCoin?.id}
+            selectedCoin={conversion?.[type]?.selectedCoin}
             coins={conversion?.[type]?.coins || []}
             isDisabled={conversion?.[type]?.isDisabled}
           />

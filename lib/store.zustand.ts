@@ -18,10 +18,10 @@ export const useConversation = create<IUseConversation>((set) => ({
         image: `${APP_CONSTANTS.VERCEL_AVATAR}/eth`,
       },
       {
-        id: "usdt",
-        label: "USDT",
-        value: "usdt",
-        image: `${APP_CONSTANTS.VERCEL_AVATAR}/usdt`,
+        id: "usdc",
+        label: "USDC",
+        value: "usdc",
+        image: `${APP_CONSTANTS.VERCEL_AVATAR}/usdc`,
       },
       {
         id: "naira",
@@ -32,6 +32,12 @@ export const useConversation = create<IUseConversation>((set) => ({
     ],
     amount: 0,
     label: "Recieve",
+    selectedCoin: {
+      id: "naira",
+      label: "Naira",
+      value: "naira",
+      image: `${APP_CONSTANTS.VERCEL_AVATAR}/naira`,
+    },
   },
   sell: {
     coins: [
@@ -48,10 +54,10 @@ export const useConversation = create<IUseConversation>((set) => ({
         image: `${APP_CONSTANTS.VERCEL_AVATAR}/eth`,
       },
       {
-        id: "usdt",
-        label: "USDT",
-        value: "usdt",
-        image: `${APP_CONSTANTS.VERCEL_AVATAR}/usdt`,
+        id: "usdc",
+        label: "USDC",
+        value: "usdc",
+        image: `${APP_CONSTANTS.VERCEL_AVATAR}/usdc`,
       },
       {
         id: "naira",
@@ -62,6 +68,12 @@ export const useConversation = create<IUseConversation>((set) => ({
     ],
     amount: 0,
     label: "Send",
+    selectedCoin: {
+      id: "usdc",
+      label: "USDC",
+      value: "usdc",
+      image: `${APP_CONSTANTS.VERCEL_AVATAR}/usdc`,
+    },
   },
   active: "buy",
   edit(type, data, value) {

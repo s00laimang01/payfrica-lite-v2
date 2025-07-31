@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactElement, ReactNode } from "react";
 
 export interface ILogo {
   showImage?: boolean;
@@ -8,6 +8,7 @@ export interface ILogo {
 
 export interface IConnectWalletBtn {
   className?: string;
+  children?: any;
   onWalletConnect?: () => void;
 }
 
@@ -60,7 +61,7 @@ export interface IUseConversation {
 
 export interface ICoinSelector {
   onCoinSelect?: (coin: ICoin) => void;
-  selectedCoin?: string;
+  selectedCoin?: ICoin;
   coins?: ICoin[];
   isDisabled?: boolean;
 }
@@ -76,5 +77,34 @@ export interface IConversionCard {
 export interface IWalletNotConnected {
   children?: ReactNode;
   open?: boolean;
+  forceClose?: boolean;
   onWalletConnected?: () => void;
+}
+
+export interface IExchangeSessionState {
+  from: ICoin;
+  to: ICoin;
+  amount: number;
+  fromLabel: string;
+  toLabel: string;
+  active: "sell" | "buy";
+}
+
+export interface paymentGateway {
+  id: string;
+  label: string;
+  image: string;
+  description: string;
+}
+
+export interface ISelectPaymentGateway {
+  onGatewaySelection?: (gateway: paymentGateway) => void;
+  gateway?: paymentGateway;
+}
+
+export interface IEnterBankDetails {
+  onBankSelect?: (bank: string) => void;
+  selectedBank?: string;
+  onAccountNumberInput?: (accountNumber?: string) => void;
+  accountNumber?: string;
 }

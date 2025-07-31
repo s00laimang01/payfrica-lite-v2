@@ -24,7 +24,7 @@ import { ICoinSelector } from "@/types";
 
 export function CoinSelector({
   onCoinSelect,
-  selectedCoin = "",
+  selectedCoin,
   coins = [],
   ...props
 }: ICoinSelector) {
@@ -45,13 +45,13 @@ export function CoinSelector({
           className="md:gap-1 rounded-full text-xs md:text-sm h-8 md:h-9"
         >
           <Image
-            src={findCoin(selectedCoin).image!}
-            alt={findCoin(selectedCoin).label}
+            src={selectedCoin?.image!}
+            alt={selectedCoin?.label!}
             width={20}
             height={20}
             className="rounded-full -ml-1"
           />
-          {findCoin(selectedCoin).label}
+          {selectedCoin?.label!}
           <ChevronsUpDownIcon className="md:ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -73,7 +73,7 @@ export function CoinSelector({
                   <CheckIcon
                     className={cn(
                       "mr-2 h-4 w-4",
-                      findCoin(selectedCoin).value === coin.value
+                      selectedCoin?.value === coin.value
                         ? "opacity-100"
                         : "opacity-0"
                     )}

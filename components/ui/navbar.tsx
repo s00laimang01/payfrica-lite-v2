@@ -1,3 +1,5 @@
+"use client";
+
 import React, { FC } from "react";
 import { Logo } from "../logo";
 import { navBarLinks } from "@/lib/constant";
@@ -7,6 +9,7 @@ import { AccountInfo } from "../account-info";
 import { INavbar } from "@/types";
 import { NavBarMobile } from "../navbar-mobile";
 import { Balance } from "../balance";
+import { useWallet } from "@suiet/wallet-kit";
 
 const NavbarLinks = () => {
   return (
@@ -24,7 +27,7 @@ const NavbarLinks = () => {
 };
 
 export const NavBar: FC<INavbar> = ({ isMobile = true }) => {
-  const isWalletConnected = true;
+  const { connected: isWalletConnected } = useWallet();
 
   if (isMobile) {
   }

@@ -30,7 +30,7 @@ export const Logo: FC<ILogo> = ({
   }
 
   return (
-    <div>
+    <div className="flex items-center gap-2">
       {showImage && (
         <Image
           src="/payfrica-logo.png"
