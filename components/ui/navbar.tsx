@@ -37,7 +37,8 @@ const NavbarLinks = () => {
   );
 };
 
-export const NavBar: FC<INavbar> = () => {
+// Component that uses useSearchParams - wrapped in its own component
+const NavBarContent: FC<INavbar> = () => {
   const isMobile = useMediaQuery("(max-width:767px)");
   const { connected: isWalletConnected, address } = useWallet();
   const [hasProcessedConnection, setHasProcessedConnection] = useState(false);
@@ -46,11 +47,11 @@ export const NavBar: FC<INavbar> = () => {
   const { balance = 0 } = useAccountBalance();
   const [userBalance, setUserBalance] = useState(0);
 
+  // This is now safely wrapped in Suspense
   const query = useSearchParams();
 
   const findCoin = (coinId: string) => {
     const coin = availableCoins?.find((coin) => coin.id === coinId);
-
     return coin || availableCoins?.[0];
   };
 
@@ -90,7 +91,6 @@ export const NavBar: FC<INavbar> = () => {
   //Setting the user balance
   useEffect(() => {
     if (isLoading || !balanceData) return;
-
     setUserBalance(balanceData.to.amount || 0);
   }, [isLoading, balanceData]);
 
@@ -108,45 +108,70 @@ export const NavBar: FC<INavbar> = () => {
   }, [isWalletConnected, address, hasProcessedConnection]);
 
   return (
-    <Suspense
-      fallback={
-        <div className="h-10 w-24 bg-secondary animate-pulse rounded-md"></div>
-      }
-    >
-      <nav className="container mx-auto pt-7 flex items-center justify-between p-3">
-        <Logo isClickable={isWalletConnected || isMobile} />
-        {/* Desktop ToolBar */}
-        <div className="hidden md:block">
-          {isWalletConnected ? (
-            <AccountInfo
-              balance={payfricalitev2.formatCurrency(
-                userBalance,
-                query?.get("coinId") === "usdc" ? "USD" : "NGN"
-              )}
-            />
-          ) : (
-            <NavbarLinks />
-          )}
-        </div>
-        {/* Mobile ToolBar */}
-        <div className="fixed bottom-5 w-full left-0 z-[100]">
-          <div className="w-full flex items-center justify-center">
-            {isWalletConnected && <NavBarMobile />}
-          </div>
-        </div>
+    <nav className="container mx-auto pt-7 flex items-center justify-between p-3">
+      <Logo isClickable={isWalletConnected || isMobile} />
+
+      {/* Desktop ToolBar */}
+      <div className="hidden md:block">
         {isWalletConnected ? (
-          <Balance
+          <AccountInfo
             balance={payfricalitev2.formatCurrency(
               userBalance,
               query?.get("coinId") === "usdc" ? "USD" : "NGN"
             )}
           />
         ) : (
-          <ConnectWalletBtn>
-            <Button className={"cursor-pointer"}>Connect Wallet</Button>
-          </ConnectWalletBtn>
+          <NavbarLinks />
         )}
-      </nav>
+      </div>
+
+      {/* Mobile ToolBar */}
+      <div className="fixed bottom-5 w-full left-0 z-[100]">
+        <div className="w-full flex items-center justify-center">
+          {isWalletConnected && <NavBarMobile />}
+        </div>
+      </div>
+
+      {isWalletConnected ? (
+        <Balance
+          balance={payfricalitev2.formatCurrency(
+            userBalance,
+            query?.get("coinId") === "usdc" ? "USD" : "NGN"
+          )}
+        />
+      ) : (
+        <ConnectWalletBtn>
+          <Button className={"cursor-pointer"}>Connect Wallet</Button>
+        </ConnectWalletBtn>
+      )}
+    </nav>
+  );
+};
+
+// Fallback component for loading state
+const NavBarFallback = () => {
+  const isMobile = useMediaQuery("(max-width:767px)");
+
+  return (
+    <nav className="container mx-auto pt-7 flex items-center justify-between p-3">
+      <Logo isClickable={isMobile} />
+
+      {/* Desktop fallback */}
+      <div className="hidden md:block">
+        <div className="h-10 w-48 bg-gray-200 animate-pulse rounded-md"></div>
+      </div>
+
+      {/* Connect wallet button fallback */}
+      <div className="h-10 w-32 bg-gray-200 animate-pulse rounded-md"></div>
+    </nav>
+  );
+};
+
+// Main NavBar component with proper Suspense boundary
+export const NavBar: FC<INavbar> = () => {
+  return (
+    <Suspense fallback={<NavBarFallback />}>
+      <NavBarContent />
     </Suspense>
   );
 };

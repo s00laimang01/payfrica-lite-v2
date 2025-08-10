@@ -170,7 +170,7 @@ const Page = () => {
                 <CardTitle>
                   <Link
                     className="underline text-primary"
-                    target="__blank"
+                    target="_blank"
                     href="https://www.suioncampus.org/"
                   >
                     SUI ON CAMPUS
