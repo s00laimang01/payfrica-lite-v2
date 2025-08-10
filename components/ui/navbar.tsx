@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, Suspense, useEffect, useState } from "react";
 import { Logo } from "../logo";
 import { navBarLinks, ResponseCodes } from "@/lib/constant";
 import Link from "next/link";
@@ -108,39 +108,45 @@ export const NavBar: FC<INavbar> = () => {
   }, [isWalletConnected, address, hasProcessedConnection]);
 
   return (
-    <nav className="container mx-auto pt-7 flex items-center justify-between p-3">
-      <Logo isClickable={isWalletConnected || isMobile} />
-      {/* Desktop ToolBar */}
-      <div className="hidden md:block">
+    <Suspense
+      fallback={
+        <div className="h-10 w-24 bg-secondary animate-pulse rounded-md"></div>
+      }
+    >
+      <nav className="container mx-auto pt-7 flex items-center justify-between p-3">
+        <Logo isClickable={isWalletConnected || isMobile} />
+        {/* Desktop ToolBar */}
+        <div className="hidden md:block">
+          {isWalletConnected ? (
+            <AccountInfo
+              balance={payfricalitev2.formatCurrency(
+                userBalance,
+                query?.get("coinId") === "usdc" ? "USD" : "NGN"
+              )}
+            />
+          ) : (
+            <NavbarLinks />
+          )}
+        </div>
+        {/* Mobile ToolBar */}
+        <div className="fixed bottom-5 w-full left-0 z-[100]">
+          <div className="w-full flex items-center justify-center">
+            {isWalletConnected && <NavBarMobile />}
+          </div>
+        </div>
         {isWalletConnected ? (
-          <AccountInfo
+          <Balance
             balance={payfricalitev2.formatCurrency(
               userBalance,
               query?.get("coinId") === "usdc" ? "USD" : "NGN"
             )}
           />
         ) : (
-          <NavbarLinks />
+          <ConnectWalletBtn>
+            <Button className={"cursor-pointer"}>Connect Wallet</Button>
+          </ConnectWalletBtn>
         )}
-      </div>
-      {/* Mobile ToolBar */}
-      <div className="fixed bottom-5 w-full left-0 z-[100]">
-        <div className="w-full flex items-center justify-center">
-          {isWalletConnected && <NavBarMobile />}
-        </div>
-      </div>
-      {isWalletConnected ? (
-        <Balance
-          balance={payfricalitev2.formatCurrency(
-            userBalance,
-            query?.get("coinId") === "usdc" ? "USD" : "NGN"
-          )}
-        />
-      ) : (
-        <ConnectWalletBtn>
-          <Button className={"cursor-pointer"}>Connect Wallet</Button>
-        </ConnectWalletBtn>
-      )}
-    </nav>
+      </nav>
+    </Suspense>
   );
 };
