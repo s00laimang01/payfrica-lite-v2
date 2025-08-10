@@ -30,10 +30,6 @@ export function CoinSelector({
 }: ICoinSelector) {
   const [open, setOpen] = React.useState(false);
 
-  const findCoin = (coinId: string) => {
-    return coins?.find((coin) => coin.id === coinId) || coins[0];
-  };
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -61,10 +57,10 @@ export function CoinSelector({
           <CommandList>
             <CommandEmpty>No coin found.</CommandEmpty>
             <CommandGroup>
-              {coins.map((coin) => (
+              {coins?.map((coin) => (
                 <CommandItem
-                  key={coin.value}
-                  value={coin.value}
+                  key={coin?.value}
+                  value={coin?.value}
                   onSelect={() => {
                     onCoinSelect?.(coin);
                     setOpen(false);

@@ -19,6 +19,7 @@ import { cn, payfricalitev2 } from "@/lib/utils";
 import { APP_CONSTANTS } from "@/lib/constant";
 import { toast } from "sonner";
 import { useWallet } from "@suiet/wallet-kit";
+import { usePayfricaV2Store } from "@/lib/store.zustand";
 import { useRouter } from "next/navigation";
 
 export const AccountInfo: FC<IAccountInfo> = ({
@@ -30,6 +31,8 @@ export const AccountInfo: FC<IAccountInfo> = ({
   ...props
 }) => {
   const r = useRouter();
+  const { setShowAccountInfoModal, setShowSettingsModal } =
+    usePayfricaV2Store();
   const { address, ...wallet } = useWallet();
   const copyAddress = (addr?: string) => {
     if (!addr) return;
@@ -77,17 +80,26 @@ export const AccountInfo: FC<IAccountInfo> = ({
           <DropdownMenuItem className="flex items-center justify-between">
             Balance
             <DropdownMenuLabel className="font-bold text-primary">
-              0 SUI
+              {props.balance}
             </DropdownMenuLabel>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem
+            className={cn(
+              payfricalitev2.isPathMatching("/transactions") && "bg-secondary"
+            )}
+            onClick={() => r.push("/transactions")}
+          >
+            Transactions
+            <DropdownMenuShortcut>⌘T</DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setShowSettingsModal?.(true)}>
             Settings
             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={() => r.push("/account")}
+          onClick={() => setShowAccountInfoModal(true)}
           className="text-destructive hover:text-destructive"
         >
           <Upload size={19} className="text-destructive rotate-90" />

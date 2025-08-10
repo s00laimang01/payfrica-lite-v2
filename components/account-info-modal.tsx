@@ -11,32 +11,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { APP_CONSTANTS } from "@/lib/constant";
+import { usePayfricaV2Store } from "@/lib/store.zustand";
 import { payfricalitev2 } from "@/lib/utils";
 import { useWallet } from "@suiet/wallet-kit";
 import { Copy } from "lucide-react";
 import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 
 export default function AccountModal() {
-  const router = useRouter();
-  const pathname = usePathname();
   const { connected, ...wallet } = useWallet();
-
-  // Determine if we're on the account page or a different page with the modal
-  const isAccountPage = pathname === "/account";
-
-  // Handle modal close action
-  const handleCloseModal = () => {
-    if (isAccountPage) {
-      // If we're on the account page, navigate to home
-      router.push("/");
-    } else {
-      // Otherwise just go back
-      router.back();
-    }
-  };
+  const { setShowAccountInfoModal, showAccountInfoModal } =
+    usePayfricaV2Store();
 
   //Copy current account address
   const copyAddress = () => {
@@ -47,7 +33,7 @@ export default function AccountModal() {
   };
 
   return (
-    <Dialog open={true} onOpenChange={handleCloseModal}>
+    <Dialog open={showAccountInfoModal} onOpenChange={setShowAccountInfoModal}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="flex items-start justify-start">
           <DialogTitle className="text-xl font-medium">
@@ -100,13 +86,18 @@ export default function AccountModal() {
               className="h-[2.5rem] text-primary border-primary hover:bg-destructive hover:text-accent cursor-pointer w-full"
               onClick={() => {
                 wallet.disconnect();
-                handleCloseModal();
+                setShowAccountInfoModal(false);
               }}
             >
               Disconnect
             </Button>
           ) : (
-            <ConnectWalletBtn />
+            <ConnectWalletBtn 
+              onWalletConnect={() => {
+                // This ensures user creation is triggered when connecting from account info modal
+                // The onWalletConnect callback is already calling createUser in the ConnectWalletBtn component
+              }}
+            />
           )}
         </DialogFooter>
       </DialogContent>

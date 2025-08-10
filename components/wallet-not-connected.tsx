@@ -83,7 +83,12 @@ export const WalletNotConnected: FC<IWalletNotConnected> = ({
         <DialogDescription className="text-center">
           No worries, please click on the button below
         </DialogDescription>
-        <ConnectWalletBtn>
+        <ConnectWalletBtn
+          onWalletConnect={() => {
+            props?.onWalletConnected?.();
+            setOpen(false);
+          }}
+        >
           <Button variant="secondary" className="h-[2.5rem] cursor-pointer">
             Connect Wallet
           </Button>

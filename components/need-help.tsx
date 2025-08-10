@@ -1,3 +1,4 @@
+import { APP_CONSTANTS } from "@/lib/constant";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import React, { FC } from "react";
@@ -12,7 +13,11 @@ export const NeedHelp: FC<{ className?: string }> = ({ className }) => {
     >
       <div className="size-2 bg-primary animate-pulse rounded-full" />
       Need help?{" "}
-      <Link href="/help" className="text-primary underline ml-1">
+      <Link
+        target="_blank"
+        href={`mailto:${APP_CONSTANTS.EMAIL}`}
+        className="text-primary underline ml-1"
+      >
         Click here
       </Link>
     </div>

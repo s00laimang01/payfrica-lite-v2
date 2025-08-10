@@ -1,7 +1,9 @@
 import { APP_CONSTANTS } from "@/lib/constant";
-import React from "react";
+import React, { FC } from "react";
 
-const ShiningButton = () => {
+const ShiningButton: FC<{ text?: string }> = ({
+  text = `${APP_CONSTANTS.appName} LITE 2.0`,
+}) => {
   return (
     <button className="group relative dark:bg-neutral-800 bg-neutral-200 rounded-full p-px overflow-hidden">
       <span className="absolute inset-0 rounded-full overflow-hidden">
@@ -88,7 +90,7 @@ const ShiningButton = () => {
           />
         </span>
         <span className="bg-gradient-to-b ml-1.5 dark:from-white dark:to-white/50 from-neutral-950 to-neutral-950/50 bg-clip-text text-xs text-transparent group-hover:scale-105 transition transform-gpu">
-          {APP_CONSTANTS.appName} LITE 2.0
+          {text}
         </span>
       </span>
     </button>

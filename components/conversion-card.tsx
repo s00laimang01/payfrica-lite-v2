@@ -11,6 +11,7 @@ export const ConversionCard: FC<IConversionCard> = ({
   type,
   showFees,
   amount = 0,
+  disable = false,
   ...props
 }) => {
   const conversion = useConversation();
@@ -55,7 +56,8 @@ export const ConversionCard: FC<IConversionCard> = ({
             </p>
             <CardTitle className="md:text-2xl text-sm font-bold flex items-center gap-1">
               <Input
-                value={String(amount)}
+                disabled={disable || props.disableinput}
+                value={isNaN(Number(amount)) ? "0" : String(amount)}
                 onChange={(e) => {
                   if (isNaN(Number(e.target.value))) return;
 
@@ -69,10 +71,17 @@ export const ConversionCard: FC<IConversionCard> = ({
           </div>
           <CoinSelector
             key={conversion?.[type]?.selectedCoin?.id}
-            onCoinSelect={onCoinSelect}
+            onCoinSelect={(c) => {
+              onCoinSelect(c);
+              props?.onCoinSelection?.(c);
+            }}
             selectedCoin={conversion?.[type]?.selectedCoin}
             coins={conversion?.[type]?.coins || []}
-            isDisabled={conversion?.[type]?.isDisabled}
+            isDisabled={
+              disable ||
+              props.disableCoinSelector ||
+              conversion?.[type]?.isDisabled
+            }
           />
         </header>
         <Separator />

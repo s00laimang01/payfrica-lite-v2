@@ -10,10 +10,24 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { NavBar } from "@/components/ui/navbar";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import { IExchangeSessionState, paymentGateway } from "@/types";
-import { useSessionStorage } from "@uidotdev/usehooks";
-import { ChevronLeft, Landmark, ThumbsUp } from "lucide-react";
+import { cn, PayfricaLiteV2 } from "@/lib/utils";
+import {
+  IBank,
+  IConfirmExchange,
+  IExchangeSessionState,
+  IResolveAccount,
+  paymentGateway,
+} from "@/types";
+import {
+  Check,
+  CheckCircle,
+  CheckCircle2,
+  ChevronLeft,
+  Landmark,
+  Loader2,
+  ThumbsUp,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -21,23 +35,83 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { EnterBankDetails } from "@/components/enter-bank-details";
+import { useSessionStorage } from "@/hooks";
+import { NotFound } from "@/components/not-found";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ConfirmExhange } from "@/components/confirm-exchange";
+import { useWallet } from "@suiet/wallet-kit";
+import { useQuery } from "@tanstack/react-query";
+import { usePayfricaV2Store } from "@/lib/store.zustand";
+import { SelectBeneficiary } from "@/components/select-beneficiary";
 
 const Page = () => {
+  const { address, connected } = useWallet();
+
+  const { setShowAddEmailModal, user } = usePayfricaV2Store();
   const [gateway, setGateway] = useState<paymentGateway>();
-  const [bankDetails, setBankDetails] = useState({
-    accountNumber: "",
-    selectedBank: "",
-  });
+  const [resolvedAccount, setResolvedAccount] = useState<IResolveAccount>();
   const [sessionState] = useSessionStorage<IExchangeSessionState | null>(
     "confirm-exchange",
     null
   );
+  const [bankDetails, setBankDetails] = useState({
+    accountNumber: "",
+    selectedBank: {} as IBank,
+  });
+  const [confirmExhange, setConfirmExchange] = useState<IConfirmExchange>();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const payfricalitev2 = new PayfricaLiteV2(address);
+
+  const { isLoading: isCalculating, data } = useQuery({
+    queryKey: [
+      "exchange",
+      sessionState?.from.id,
+      sessionState?.to.id,
+      sessionState?.amount,
+    ],
+    queryFn: () =>
+      payfricalitev2.calculateExchange(
+        sessionState?.from.id!,
+        sessionState?.to.id!,
+        Number(sessionState?.amount)
+      ),
+    enabled: Boolean(
+      !!sessionState &&
+        !!sessionState.from.id &&
+        !!sessionState.to.id &&
+        !!sessionState.amount
+    ),
+    refetchInterval: 1000 * 60,
+  });
 
   const onGatewaySelection = (selectedGateway: paymentGateway) => {
+    if (!gateway && !user?.email) {
+      setShowAddEmailModal?.(true);
+    }
+
     setGateway(selectedGateway);
   };
 
+  const doesSessionExist = () => {
+    if (!connected) return false;
+
+    if (!sessionState) return false;
+
+    const { active, from, to } = sessionState;
+
+    if (!active) return false;
+
+    if (!from.id || !from.image || !from.value) return false;
+
+    if (!to.id || !to.image || !to.value) return false;
+
+    return true;
+  };
+
   const confirm = async () => {
+    const transactionId = payfricalitev2.generateTransactionId();
+
     try {
       if (!sessionState) {
         toast.success("Exchange session not found");
@@ -56,10 +130,93 @@ const Page = () => {
         toast.error("Please enter your bank details");
         return;
       }
-    } catch (error) {
-      toast.error("Oops somthing went wrong, please try again");
+
+      setIsLoading(true);
+
+      if (sessionState.active === "buy") {
+        const res = await payfricalitev2.initiateCharge({
+          amount: sessionState.amount,
+          from: sessionState.from.id!,
+          type: "buy",
+          transactionId: transactionId,
+        });
+
+        window.open(res.transaction?.paystack?.authorizationUrl!, "__blank");
+
+        setConfirmExchange({
+          ...confirmExhange,
+          open: true,
+          transactionId: res.transaction.reference,
+          coins: {
+            from: {
+              ...sessionState.from,
+              amount: res.transaction.from?.amount,
+            },
+            to: { ...sessionState.to, amount: res.transaction.to?.amount! },
+          },
+          status: res.transaction.status,
+          note: "Your transaction has been initiated, you will receive your coins once we have confirm your payment",
+        });
+      }
+
+      if (sessionState.active === "sell") {
+        const { data: res, message } = await payfricalitev2.placeWithdrawal({
+          from: sessionState.from.id!,
+          to: sessionState.to.id!,
+          account: {
+            accountName: resolvedAccount?.account.accountName,
+            accountNumber: resolvedAccount?.account.accountNumber,
+            bankCode: bankDetails.selectedBank.code,
+            bankName: bankDetails.selectedBank.name,
+          },
+          amount: sessionState.from.amount!,
+        });
+
+        setConfirmExchange({
+          ...confirmExhange,
+          transactionId: res.reference,
+          coins: {
+            from: { ...sessionState?.from!, amount: sessionState?.amount },
+            to: { ...sessionState?.to!, amount: res.amount },
+          },
+          status: res.status,
+          note:
+            message ||
+            "Your transaction has been initiated, you will receive your coins once we have confirm your payment",
+          open: true,
+        });
+      }
+    } catch (error: any) {
+      setConfirmExchange({
+        ...confirmExhange,
+        transactionId,
+        coins: {
+          from: { ...sessionState?.from!, amount: sessionState?.amount },
+          to: { ...sessionState?.to!, amount: sessionState?.amount! / 2 },
+        },
+        status: "failed",
+        note:
+          error.response.data.message ??
+          "Failed to complete the transaction, please try again",
+        open: true,
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (!doesSessionExist()) {
+    return (
+      <div>
+        <NavBar />
+        <NotFound
+          title="SESSION EXPIRED"
+          description="Your session has expired, please try again"
+          className="w-screen h-[calc(100vh-200px)]"
+        />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -80,20 +237,28 @@ const Page = () => {
               <div>
                 <CardDescription>{sessionState?.fromLabel}</CardDescription>
                 <CardTitle className="md:text-4xl text-2xl font-bold text-primary">
-                  {sessionState?.amount} {sessionState?.from?.label}
+                  {data?.from.amount || 0} {sessionState?.from?.label}
                 </CardTitle>
                 <CardDescription className="md:text-lg text-md">
-                  ~$23.82
+                  ~{" "}
+                  {payfricalitev2.formatCurrency(
+                    sessionState?.amount!,
+                    sessionState?.from.id === "usdc" ? "USD" : "NGN"
+                  )}
                 </CardDescription>
               </div>
               {/* TO */}
               <div>
                 <CardDescription>{sessionState?.toLabel}</CardDescription>
                 <CardTitle className="md:text-4xl text-2xl font-bold text-primary">
-                  {sessionState?.amount! * 2} {sessionState?.to?.label}
+                  {data?.to.amount?.toFixed(4) || "0"} {sessionState?.to?.label}
                 </CardTitle>
                 <CardDescription className="md:text-lg text-md">
-                  ~$23.82
+                  ~
+                  {payfricalitev2.formatCurrency(
+                    data?.to?.amount!,
+                    sessionState?.to.id === "usdc" ? "USD" : "NGN"
+                  )}
                 </CardDescription>
               </div>
 
@@ -102,8 +267,8 @@ const Page = () => {
                 <div className="flex items-center justify-between">
                   <p className="text-accent-foreground/55">Rate</p>
                   <CardTitle>
-                    1 {sessionState?.from?.label} = 2 {sessionState?.to?.label}{" "}
-                    (~$5.5)
+                    {data?.from?.rate?.usdc} {data?.from?.label} ={" "}
+                    {data?.from?.rate?.naira} {data?.to?.label} (~$1)
                   </CardTitle>
                 </div>
                 <div className="flex items-center justify-between">
@@ -193,15 +358,62 @@ const Page = () => {
                 />
               </div>
             ) : (
-              <EnterBankDetails
-                {...bankDetails}
-                onAccountNumberInput={(e) =>
-                  setBankDetails({ ...bankDetails, accountNumber: e! })
+              <div>
+                {
+                  <div className="flex items-center justify-between">
+                    <SelectBeneficiary
+                      onBankSelection={(bank) => {
+                        setBankDetails({
+                          accountNumber: bank.account.accountNumber,
+                          selectedBank: {
+                            ...bankDetails.selectedBank,
+                            code: bank.account.bankCode,
+                            name: bank.account.bankName!,
+                            id: Math.floor(Math.random() * 10000000),
+                          },
+                        });
+                      }}
+                    >
+                      <Button variant="link" size="sm" className="mt-3">
+                        Beneficiaries
+                      </Button>
+                    </SelectBeneficiary>
+                    {resolvedAccount?.isResolving ? (
+                      <Skeleton className="w-[8.5rem] h-6" />
+                    ) : (
+                      <div className="flex items-center gap-1 mt-2">
+                        {resolvedAccount?.account?.accountName && (
+                          <CheckCircle2 size={16} className="text-green-500" />
+                        )}
+                        <h2
+                          className={cn(
+                            resolvedAccount?.account?.accountName &&
+                              "ms:text-sm text-xs text-muted-foreground font-semibold",
+                            !!resolvedAccount?.resolveError &&
+                              "text-destructive"
+                          )}
+                        >
+                          {resolvedAccount?.account?.accountName ||
+                            resolvedAccount?.resolveError?.message}
+                        </h2>
+                      </div>
+                    )}
+                  </div>
                 }
-                onBankSelect={(e) =>
-                  setBankDetails({ ...bankDetails, selectedBank: e })
-                }
-              />
+                <EnterBankDetails
+                  key={bankDetails.selectedBank.name}
+                  {...bankDetails}
+                  onAccountNumberInput={(e) =>
+                    setBankDetails({ ...bankDetails, accountNumber: e! })
+                  }
+                  onBankSelect={(e) =>
+                    setBankDetails({ ...bankDetails, selectedBank: e })
+                  }
+                  onAccountResolve={(resolvedAccount) => {
+                    setResolvedAccount({ ...resolvedAccount });
+                  }}
+                />
+              </div>
             )}
           </div>
           <div className="mt-3">
@@ -215,17 +427,44 @@ const Page = () => {
                 proceed
               </CardDescription>
             </div>
-            <Button
-              onClick={confirm}
-              disabled={
-                !gateway &&
-                (bankDetails.accountNumber.length !== 10 ||
-                  !bankDetails.selectedBank)
+            <ConfirmExhange
+              key={String(confirmExhange?.open) + confirmExhange?.status}
+              open={!!confirmExhange?.open}
+              transactionId={confirmExhange?.transactionId!}
+              status={confirmExhange?.status}
+              coins={{ ...confirmExhange?.coins! }}
+              note={confirmExhange?.note!}
+              forceClose={!confirmExhange?.open}
+              onTransactionUpdate={(transaction) => {
+                setConfirmExchange({
+                  ...confirmExhange!,
+                  status: transaction.status,
+                  note:
+                    transaction.status === "success"
+                      ? "We have recieved your payment and we will release the coins to you shortly"
+                      : transaction.status == "failed"
+                      ? "Your transaction could not be completed. This could be due to network issues or insufficient funds. Please check and try again. If the problem persists, contact our support team for assistance."
+                      : confirmExhange?.note,
+                });
+              }}
+              onClose={(e) =>
+                setConfirmExchange({ ...confirmExhange!, open: e })
               }
-              className="w-full h-[3rem] rounded-sm mt-2 cursor-pointer"
             >
-              CONFIRM
-            </Button>
+              <Button
+                onClick={confirm}
+                disabled={
+                  isLoading ||
+                  (!gateway &&
+                    (bankDetails.accountNumber.length !== 10 ||
+                      !bankDetails.selectedBank.code) &&
+                    !resolvedAccount?.account?.accountName)
+                }
+                className="w-full h-[3rem] rounded-sm mt-2 cursor-pointer"
+              >
+                {isLoading ? <Loader2 className="animate-spin" /> : "CONFIRM"}
+              </Button>
+            </ConfirmExhange>
           </div>
 
           {/* Numbering */}

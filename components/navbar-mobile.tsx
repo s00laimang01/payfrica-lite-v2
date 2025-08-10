@@ -22,7 +22,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useWallet } from "@suiet/wallet-kit";
-import { useRouter } from "next/navigation";
+import { usePayfricaV2Store } from "@/lib/store.zustand";
+import Link from "next/link";
+import { cn, payfricalitev2 } from "@/lib/utils";
 
 const navs = [
   {
@@ -32,7 +34,7 @@ const navs = [
   },
   {
     icon: Settings2,
-    path: "/settings",
+    path: "settings",
     title: "Settings",
   },
   {
@@ -42,13 +44,16 @@ const navs = [
   },
   {
     icon: CircleQuestionMark,
-    path: "/support",
+    path: "mailto:support@payfrica.com",
+    target: "_blank",
+
     title: "Support",
   },
 ];
 
-export const NavBarMobile: FC<{}> = ({}) => {
-  const r = useRouter();
+export const NavBarMobile: FC<{}> = () => {
+  const { setShowAccountInfoModal, setShowSettingsModal } =
+    usePayfricaV2Store();
   const { address } = useWallet();
 
   const copyAddress = (addr?: string) => {
@@ -62,12 +67,27 @@ export const NavBarMobile: FC<{}> = ({}) => {
       <div className="space-x-1">
         {navs.map((nav, idx) => (
           <Button
+            asChild
             variant="ghost"
-            className="rounded-full hover:bg-primary/70 hover:text-accent"
+            className={cn(
+              "rounded-full hover:bg-primary/70 hover:text-accent",
+              payfricalitev2.isPathMatching(nav.path) &&
+                "bg-primary/70 text-white"
+            )}
             size="icon"
+            onClick={() => {
+              if (nav.path === "settings") {
+                setShowSettingsModal?.(true);
+              }
+            }}
             key={idx}
           >
-            <nav.icon size={22} />
+            <Link
+              href={nav.path === "settings" ? location.pathname : nav.path}
+              target={nav.target}
+            >
+              <nav.icon size={22} />
+            </Link>
           </Button>
         ))}
       </div>
@@ -102,7 +122,7 @@ export const NavBarMobile: FC<{}> = ({}) => {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => r.push("/account")}
+            onClick={() => setShowAccountInfoModal(true)}
             className="text-destructive hover:text-destructive"
           >
             <Upload size={19} className="text-destructive rotate-90" />

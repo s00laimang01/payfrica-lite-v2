@@ -67,11 +67,11 @@ export const SelectPaymentGateway: FC<ISelectPaymentGateway> = ({
 
         <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1 p-3">
           {availablePaymentProviders.map((gateway) => (
-            <Button
+            <div
               key={gateway.id}
-              variant="outline"
+              //variant="outline"
               className={cn(
-                "h-auto min-h-[4rem] w-full justify-start p-3 hover:bg-muted/50 hover:border-primary/30 transition-all group",
+                "h-auto min-h-[4rem] w-full justify-start p-3 hover:bg-muted/50 hover:border-primary/30 transition-all group border-[3.5px] rounded-md",
                 gateway.id === props.gateway?.id ? "bg-primary/5" : ""
               )}
               onClick={() => {
@@ -98,11 +98,12 @@ export const SelectPaymentGateway: FC<ISelectPaymentGateway> = ({
                   </span>
                 </div>
                 <Checkbox
+                  role="checkbox"
                   checked={gateway.id === props?.gateway?.id}
                   className="ml-2 h-5 w-5"
                 />
               </div>
-            </Button>
+            </div>
           ))}
         </div>
         <ModalFooter className="flex flex-col">

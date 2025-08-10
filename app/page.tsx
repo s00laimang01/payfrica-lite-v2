@@ -1,11 +1,14 @@
 import { BuyNdSellCard } from "@/components/buy-nd-sell-card";
+import { Footer } from "@/components/footer";
 import { GradientText } from "@/components/gradient-text";
 import { Logo } from "@/components/logo";
 import ShiningButton from "@/components/shining-button";
 import { Boxes } from "@/components/ui/background-boxes";
 import { NavBar } from "@/components/ui/navbar";
 import { Separator } from "@/components/ui/separator";
-import { Linkedin, Twitter } from "lucide-react";
+import { APP_CONSTANTS } from "@/lib/constant";
+import { Linkedin, Mail, SendIcon, Twitter } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 const Page = () => {
@@ -35,18 +38,7 @@ const Page = () => {
                 <BuyNdSellCard />
               </div>
               <Separator className="mt-8" />
-              <div className="flex items-center justify-between mt-10">
-                <div className="flex gap-1">
-                  <Logo showName={false} />
-                  <p className="text-left text-sm">
-                    Bridging the gap, Empowering transactions
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Twitter size={22} className="text-accent-foreground/50" />
-                  <Linkedin size={22} className="text-accent-foreground/50" />
-                </div>
-              </div>
+              <Footer />
             </div>
           </div>
         </div>
