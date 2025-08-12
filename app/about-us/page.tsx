@@ -33,12 +33,12 @@ const Page = () => {
 
       <div className="mt-5">
         <div className="flex justify-center text-center gap-3">
-          <h2 className="md:text-6xl text-3xl font-bold text-muted-foreground gap-3 opacity-30">
+          <h2 className="md:text-6xl text-xl font-bold text-muted-foreground gap-3 opacity-30">
             {" "}
             THE NEW ERA OF{" "}
           </h2>
 
-          <GradientText className="opacity-100 md:text-6xl text-3xl font-bold">
+          <GradientText className="opacity-100 md:text-6xl text-xl font-bold">
             {" "}
             {APP_CONSTANTS.appName}
           </GradientText>
@@ -107,8 +107,8 @@ const Page = () => {
           </Card>
 
           {/* Side cards */}
-          <Card className="col-span-2 rounded-2xl md:col-span-1 lg:col-span-2 row-span-1 p-0 ">
-            <CardContent className="p-0 bg-primary/20 flex h-full items-center justify-center rounded-2xl gap-3 flex-col">
+          <Card className="col-span-2 rounded-2xl md:col-span-1 lg:col-span-2 row-span-1 md:p-0 py-4 ">
+            <CardContent className="p-0 bg-primary/20 flex h-full items-center justify-center rounded-2xl md:py-0 py-4 gap-3 flex-col">
               <CardTitle className="text-5xl text-center text-white font-bold">
                 Trade Anywhere
               </CardTitle>
@@ -120,8 +120,8 @@ const Page = () => {
               </Button>
             </CardContent>
           </Card>
-          <Card className="col-span-2 md:col-span-2 lg:col-span-2 row-span-1 p-0 rounded-2xl">
-            <CardContent className="space-y-4 p-0 bg-accent-foreground h-full rounded-2xl flex items-center justify-center flex-col text-accent">
+          <Card className="col-span-2 md:col-span-2 lg:col-span-2 row-span-1 md:p-0 rounded-2xl">
+            <CardContent className="space-y-4 p-0 bg-accent-foreground h-full rounded-2xl flex items-center md:py-0 py-4 justify-center flex-col text-accent">
               <div className="flex items-center justify-center gap-2">
                 {availableCoins.slice(0, 3).map((coin) => (
                   <Image
@@ -197,7 +197,7 @@ const Page = () => {
               </CardTitle>
               <RotatingText
                 texts={["SECURED", "FAST", "EFFICIENT"]}
-                mainClassName="px-2 sm:px-2 md:px-3 bg-primary text-white overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center text-xl rounded-lg w-fit"
+                mainClassName="px-2 sm:px-2 md:px-3 bg-primary text-white overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center text-medium rounded-lg w-fit"
                 staggerFrom={"last"}
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}

@@ -20,7 +20,6 @@ import { Button } from "./ui/button";
 import { Switch } from "./ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { APP_CONSTANTS } from "@/lib/constant";
-import { useSearchParams } from "next/navigation";
 import { useAccountBalance, useWallet } from "@suiet/wallet-kit";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { toast } from "sonner";
@@ -168,7 +167,6 @@ const General = () => {
 
 const Profile = () => {
   const { user } = usePayfricaV2Store();
-  const query = useSearchParams();
   const { balance = 0 } = useAccountBalance();
 
   return (

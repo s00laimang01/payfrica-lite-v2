@@ -5,6 +5,21 @@ import { NeedHelp } from "@/components/need-help";
 import { Toaster } from "@/components/ui/sonner";
 import { WalletProvider } from "@suiet/wallet-kit";
 import { ClientProvider } from "@/components/client-provider";
+import { Red_Rose, Titan_One } from "next/font/google";
+
+const redRose = Red_Rose({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-red-rose',
+  weight: ['300', '400', '500', '600', '700'],
+});
+
+const titanOne = Titan_One({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-titan-one',
+  weight: ['400'],
+});
 
 export const metadata: Metadata = {
   title: "PAYFRICA LITE",
@@ -19,7 +34,7 @@ export default function RootLayout({
   modal: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${redRose.variable} ${titanOne.variable}`}>
       <body className={`antialiased overflow-y-auto min-h-screen relative`}>
         <ClientProvider>
           {children}

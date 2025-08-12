@@ -9,19 +9,28 @@ export const Footer = () => {
     <div className="flex items-center justify-between mt-10">
       <div className="flex gap-1">
         <Logo showName={false} />
-        <p className="text-left text-sm">
+        <p className="text-left md:text-sm text-xs">
           Bridging the gap, Empowering transactions
         </p>
       </div>
       <div className="flex items-center gap-2">
         <Link target="_blank" href={APP_CONSTANTS.TWITTER}>
-          <Twitter size={22} className="text-accent-foreground/50" />
+          <Twitter
+            size={22}
+            className="text-accent-foreground/50 size-3 md:size-5"
+          />
         </Link>
         <Link target="_blank" href={`mailto:${APP_CONSTANTS.EMAIL}`}>
-          <Mail size={22} className="text-accent-foreground/50" />
+          <Mail
+            size={22}
+            className="text-accent-foreground/50 size-3 md:size-5"
+          />
         </Link>
         <Link target="_blank" href={APP_CONSTANTS.TELEGRAM}>
-          <SendIcon size={22} className="text-accent-foreground/50" />
+          <SendIcon
+            size={22}
+            className="text-accent-foreground/50 size-3 md:size-5"
+          />
         </Link>
       </div>
     </div>
